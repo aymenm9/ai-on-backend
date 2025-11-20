@@ -29,7 +29,6 @@ class ConversationHistory(models.Model):
         ('chatbot_agent', 'chatbot_agent'),
         ('main_ai_coordinator', 'main_ai_coordinator'),
         ('market_watcher', 'market_watcher'),
-        ('planner_forecaster', 'planner_forecaster'),
         ('receipt_parser', 'receipt_parser'),
         ('product_advisor', 'product_advisor'),
         ('notification_agent', 'notification_agent'),

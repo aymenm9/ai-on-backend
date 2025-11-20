@@ -5,7 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema
 from .models import Budget
 from .serializers import BudgetSerializer, BudgetListSerializer
-from .services import process_budget_generation, process_budget_update, process_budget_deletion
+from .services import process_budget_generation, process_budget_operation
 
 class BudgetGenerateView(APIView):
     """
@@ -41,27 +41,36 @@ class BudgetViewSet(viewsets.ModelViewSet):
         return Response({'detail': 'Manual creation not allowed. Use generate.'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
 
     def perform_update(self, serializer):
-        # We need to check what changed before saving, or check validated_data
         validated_data = serializer.validated_data
         instance = serializer.instance
         
-        # Check if budget or spent is changing
-        budget_changing = 'budget' in validated_data and validated_data['budget'] != instance.budget
-        spent_changing = 'spent' in validated_data and validated_data['spent'] != instance.spent
+        # Build natural language message describing the change
+        changes = []
+        if 'budget' in validated_data:
+            changes.append(f"change budget to {validated_data['budget']}")
+        if 'spent' in validated_data:
+            changes.append(f"update spent to {validated_data['spent']}")
         
-        # Perform the update
+        # Save the update first
         updated_instance = serializer.save()
         
-        # Trigger events
-        if budget_changing:
-            process_budget_update(self.request.user, updated_instance, change_type='budget_change')
+        # Construct message and call AI
+        if changes:
+            message = f"I want to edit '{instance.title}': {', '.join(changes)}"
             
-        if spent_changing:
+            # Check for overspending
             if updated_instance.spent > updated_instance.budget:
-                process_budget_update(self.request.user, updated_instance, change_type='overspending')
+                message += f". Note: This is overspending (spent {updated_instance.spent} exceeds budget {updated_instance.budget})."
+            
+            process_budget_operation(self.request.user, message)
 
     def perform_destroy(self, instance):
         user = self.request.user
+        title = instance.title
+        
+        # Delete the instance first
         instance.delete()
-        # Trigger rebalancing after deletion
-        process_budget_deletion(user)
+        
+        # Call AI with natural language message
+        message = f"I want to delete '{title}'"
+        process_budget_operation(user, message)

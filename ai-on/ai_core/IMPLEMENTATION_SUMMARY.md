@@ -8,6 +8,8 @@ The **Main AI Coordinator** has been successfully implemented in the `ai_core` a
 
 **The Main AI Coordinator has NO user-facing API endpoints.** It is designed exclusively for agent-to-agent communication. Users never interact with it directly.
 
+**Role Update**: The Coordinator is strictly a **backend manager**. It receives directives from user-facing agents (like Chatbot), commands worker agents (like Budget Agent), and reports results back to the calling agent. It does NOT engage in conversation with the user.
+
 ### Architecture Flow
 
 ```
@@ -33,6 +35,7 @@ User → Chatbot Agent → Main AI Coordinator → Budget Agent
 - **Configuration**:
   - Model: `gemini-2.5-flash-8b` (Gemini 2.5 Flash-Lite as requested)
   - Thinking Budget: `0` (for fast responses)
+- **System Instruction**: Strictly defined as a manager that commands worker agents and reports to calling agents.
 - **Features**:
   - Multi-iteration function calling (max 5 iterations)
   - Tracks which agents were called
@@ -92,12 +95,12 @@ register_agent_function(
 1. User sends message to **Chatbot Agent** (via API)
 2. Chatbot recognizes this needs coordination
 3. Chatbot calls `call_main_coordinator(user, "User wants to change grocery budget to 15000 DA")`
-4. Main AI Coordinator analyzes the request
+4. Main AI Coordinator analyzes the request: "Directive received. Delegating to Budget Agent."
 5. Main AI Coordinator calls `call_budget_agent(user, "Update grocery budget to 15000 DA")`
 6. Budget Agent updates the budget and returns result
-7. Main AI Coordinator synthesizes the response
-8. Main AI Coordinator returns to Chatbot
-9. Chatbot presents result to user
+7. Main AI Coordinator synthesizes the response: "Budget Agent updated groceries to 15000."
+8. Main AI Coordinator returns report to Chatbot
+9. Chatbot presents result to user: "I've updated your grocery budget to 15,000 DA as requested."
 
 ## Currently Supported Agents
 

@@ -119,9 +119,55 @@ The onboarding process is an interactive chat with an AI agent.
 -   **Reset Onboarding:** `POST /api/onboarding/reset/`
     -   Clears the current onboarding session and starts over.
 
-### Other Modules
+### Chatbot
 
--   **AI Core:** `/api/ai_core/`
+The Chatbot is the primary conversational interface for AION, powered by **Gemini 2.0 Flash-Lite**.
+
+-   **Send Message:** `POST /api/chat/`
+    -   Send a message to the chatbot and receive a conversational response.
+    -   **Request Body:**
+        ```json
+        {
+          "msg": "Hello! I want to create a budget"
+        }
+        ```
+    -   **Response:**
+        ```json
+        {
+          "msg": "Hi there! I'd be happy to help you create a budget..."
+        }
+        ```
+    -   **Capabilities:**
+        -   General conversation and financial advice
+        -   Update user profile (income, savings, debts, etc.)
+        -   Delegate complex tasks to specialized agents (budgets, forecasts, etc.)
+        -   Personalized responses based on user profile
+
+-   **Get Chat History:** `GET /api/chat/history/`
+    -   Retrieve the conversation history (excludes function calls).
+    -   **Response:**
+        ```json
+        [
+          {
+            "role": "user",
+            "msg": "Hello!"
+          },
+          {
+            "role": "model",
+            "msg": "Hi there! How can I help you today?"
+          }
+        ]
+        ```
+
+-   **Reset Chat:** `POST /api/chat/reset/`
+    -   Clear the conversation history and start fresh.
+    -   **Response:**
+        ```json
+        {
+          "message": "Chat history cleared successfully"
+        }
+        ```
+
 ### Budget
 
 The Budget module uses an **Event-Driven AI Agent** to manage and generate budgets.
@@ -162,9 +208,13 @@ The Budget module uses an **Event-Driven AI Agent** to manage and generate budge
     -   Deletes a category.
     -   **Event-Driven Behavior:** Triggers the AI to **rebalance** the remaining funds into other categories or savings.
 
--   **Advisor:** `/api/advisor/`
--   **Forecast:** `/api/forecast/`
--   **Chat:** `/api/chat/`
--   **Notify:** `/api/notify/`
+### Other Modules
+
+Additional modules are available but not yet fully documented:
+
+-   **AI Core:** `/api/ai_core/` - Main AI Coordinator (agent-to-agent only, no direct user access)
+-   **Advisor:** `/api/advisor/` - Product advisor agent
+-   **Forecast:** `/api/forecast/` - Financial forecasting agent
+-   **Notify:** `/api/notify/` - Notification management
 
 Check the Swagger docs (`/api/docs/`) for details on these endpoints.

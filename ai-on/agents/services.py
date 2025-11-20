@@ -172,6 +172,18 @@ def add_to_history(agent: agentModel, user: User, part: dict, role: str):
     )
 
 
+def clear_agent_history(agent: agentModel, user: User):
+    """
+    Clear conversation history for an agent and user.
+    
+    Args:
+        agent: The agent model instance
+        user: The user
+    """
+    ConversationHistory.objects.filter(user=user, agent=agent).delete()
+
+
+
 def clear_agent_functions(agent_id: int):
     """
     Clear all registered functions for an agent.
